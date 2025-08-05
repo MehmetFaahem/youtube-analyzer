@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  youtube-analyzer:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
+      - GPTZERO_API_KEY=${GPTZERO_API_KEY}
+      - PORT=8080
+      - NODE_ENV=production
+    volumes:
+      - ./data/screenshots:/usr/src/app/screenshots
+      - ./data/audio:/usr/src/app/audio
+      - ./data/results:/usr/src/app/results
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - youtube-analyzer-network
+
+networks:
+  youtube-analyzer-network:
+    driver: bridge
+
+volumes:
+  data:

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input[type="url"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="url"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result-section.show {
+            display: block;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .status.queued {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status.processing {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .status.completed {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .progress {
+            font-style: italic;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .task-id {
+            font-family: monospace;
+            background: #e9ecef;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .download-link {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+
+        .download-link:hover {
+            background: #218838;
+        }
+
+        .api-example {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .api-example h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎥 YouTube Analyzer</h1>
+            <p>AI-powered transcription and content analysis</p>
+        </div>
+
+        <form id="analyzeForm">
+            <div class="form-group">
+                <label for="youtubeUrl">YouTube URL</label>
+                <input 
+                    type="url" 
+                    id="youtubeUrl" 
+                    name="url" 
+                    placeholder="https://www.youtube.com/watch?v=..." 
+                    required
+                >
+            </div>
+            <button type="submit" class="submit-btn" id="submitBtn">
+                Analyze Video
+            </button>
+        </form>
+
+        <div id="resultSection" class="result-section">
+            <div id="status" class="status"></div>
+            <div id="taskId" class="task-id"></div>
+            <div id="progress" class="progress"></div>
+            <div id="downloadSection"></div>
+        </div>
+
+        <div class="api-example">
+            <h3>📡 API Usage</h3>
+            <p>You can also use the REST API directly:</p>
+            <div class="code-block">
+                POST /analyze<br>
+                Content-Type: application/json<br><br>
+                {<br>
+                &nbsp;&nbsp;"url": "https://www.youtube.com/watch?v=..."<br>
+                }<br><br>
+                GET /result/:task_id
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('analyzeForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const resultSection = document.getElementById('resultSection');
+        const statusDiv = document.getElementById('status');
+        const taskIdDiv = document.getElementById('taskId');
+        const progressDiv = document.getElementById('progress');
+        const downloadSection = document.getElementById('downloadSection');
+
+        let currentTaskId = null;
+        let pollInterval = null;
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const url = document.getElementById('youtubeUrl').value;
+            
+            if (!url) {
+                alert('Please enter a YouTube URL');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Starting Analysis...';
+            
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    currentTaskId = data.task_id;
+                    taskIdDiv.textContent = `Task ID: ${currentTaskId}`;
+                    showResult('queued', 'Analysis queued');
+                    startPolling();
+                } else {
+                    showResult('error', data.error || 'Analysis failed');
+                }
+            } catch (error) {
+                showResult('error', 'Network error: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Analyze Video';
+            }
+        });
+
+        function showResult(status, message, progress = '') {
+            resultSection.classList.add('show');
+            statusDiv.className = `status ${status}`;
+            statusDiv.textContent = message;
+            progressDiv.textContent = progress;
+            
+            if (status === 'completed') {
+                downloadSection.innerHTML = `
+                    <a href="/result/${currentTaskId}" class="download-link" target="_blank">
+                        📄 View Full Results
+                    </a>
+                `;
+            } else {
+                downloadSection.innerHTML = '';
+            }
+        }
+
+        function startPolling() {
+            if (pollInterval) clearInterval(pollInterval);
+            
+            pollInterval = setInterval(async () => {
+                if (!currentTaskId) return;
+                
+                try {
+                    const response = await fetch(`/result/${currentTaskId}`);
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        const status = data.status;
+                        const progress = data.progress || '';
+                        
+                        if (status === 'processing') {
+                            showResult('processing', 'Processing...', progress);
+                        } else if (status === 'completed') {
+                            showResult('completed', 'Analysis completed!');
+                            clearInterval(pollInterval);
+                        } else if (status === 'error') {
+                            showResult('error', data.error || 'Analysis failed');
+                            clearInterval(pollInterval);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Polling error:', error);
+                }
+            }, 2000);
+        }
+    </script>
+</body>
+</html> 
