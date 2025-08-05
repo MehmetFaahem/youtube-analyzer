@@ -25,7 +25,7 @@ A comprehensive Node.js service that analyzes YouTube videos with AI-powered tra
 
 1. **Clone and install dependencies:**
 ```bash
-git clone <repository-url>
+git clone https://github.com/MehmetFaahem/youtube-analyzer.git
 cd youtube-analyzer
 npm install
 ```
